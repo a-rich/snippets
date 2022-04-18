@@ -31,9 +31,6 @@ class AsyncRateLimiter():
     async def wrap(self, func, args):
         return args, await func(*args)
     
-    def is_throttled(self, result):
-        return self.throttle(result)
-    
     async def __aiter__(self):
         while self.args:
             args = self.args[:self.batch_size]
@@ -58,7 +55,7 @@ class AsyncRateLimiter():
             rerun = []
             for args, result in tasks:
                 self.logger.debug(f"\t\targs: {args} -- result: {result}")
-                if not self.is_throttled(result):
+                if not self.throttle(result):
                     yield result
                 else:
                     rerun.append(args)
